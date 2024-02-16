@@ -1,17 +1,37 @@
 'use client'
 import React from 'react';
 import { useForm } from 'react-hook-form';
-import { useRouter } from 'next/navigation';
 import axios from 'axios';
+import Link from 'next/link';
 
 const Home = () => {
-  const { register, handleSubmit, formState: { errors } } = useForm();
-  const router = useRouter();
+  const { register, handleSubmit, formState: { errors }, reset } = useForm();
 
   const onSubmit = async (data) => {
+
     try {
-      const response = await axios.post('/api/submit-form', data);
-      console.log(response.data);
+      const formData = new FormData();
+      formData.append('file', data.file[0]);
+      formData.append('name', data.name);
+      formData.append('email', data.email);
+      formData.append('address', data.address);
+      formData.append('mobile', data.mobile);
+      formData.append('city', data.city);
+      formData.append('state', data.state);
+
+      //  Send data to the API
+      const response = await axios.post('http://localhost:3000/api/handleform', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+     if(response.data.success === true){
+      alert('Data Added successfully!');
+      reset();
+     }
+
+      
     } catch (error) {
       console.error('Error submitting form:', error);
     }
@@ -20,8 +40,8 @@ const Home = () => {
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-8 md:p-24">
       <div className="w-full max-w-md">
-        <h1 className="text-3xl font-bold mb-6">Registration Form</h1>
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <h1 className="text-3xl font-bold mb-6">Registration Form <Link className = 'text-xl font-bold ml-4 text-cyan-600' href='/data'>To View Schools </Link></h1>
+        <form method='post' onSubmit={handleSubmit(onSubmit)}>
           <div className="mb-4">
             <label className="block text-sm font-semibold mb-1">Name:</label>
             <input
@@ -29,7 +49,7 @@ const Home = () => {
               {...register('name', { pattern: /^[A-Za-z ]+$/ })}
               className="w-full border p-2"
             />
-            {errors.name && <p className="text-red-500 text-sm">{errors.name.message}</p>}
+            {errors.name && <p className="text-red-500 text-sm">Enter Valid Name</p>}
           </div>
 
           <div className="mb-4">
@@ -39,7 +59,7 @@ const Home = () => {
               {...register('email', { pattern: /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}$/ })}
               className="w-full border p-2"
             />
-            {errors.email && <p className="text-red-500 text-sm">{errors.email.message}</p>}
+            {errors.email && <p className="text-red-500 text-sm">Enter Valid Email</p>}
           </div>
 
           <div className="mb-4">
@@ -58,7 +78,7 @@ const Home = () => {
               {...register('mobile', { pattern: /^\d{10}$/ })}
               className="w-full border p-2"
             />
-            {errors.mobile && <p className="text-red-500 text-sm">{errors.mobile.message}</p>}
+            {errors.mobile && <p className="text-red-500 text-sm">Enter Valid Phone Number</p>}
           </div>
 
           <div className="mb-4">
